@@ -270,7 +270,7 @@ final class DunenBLEManager: NSObject, ObservableObject {
         let accelPulse = max(0, demoThrottle - demoBrake)
         let rpm = mode == .park ? 0 : Int(demoSpeedKmh * 82 + 650 + 250 * accelPulse)
         let voltage = 78.8 - min(demoTick / 1400.0, 4.0) - accelPulse * 0.25
-        let current = mode == .park ? 0 : max(0, demoSpeedKmh / 1.9 + demoThrottle * 28 - demoBrake * 10)
+        let current = mode == .park ? 0 : max(0, demoSpeedKmh / 1.05 + demoThrottle * 92 - demoBrake * 10)
 
         telemetry.speedKmh = mode == .park ? 0 : demoSpeedKmh
         telemetry.rpm = rpm

@@ -10,26 +10,27 @@ final class SoundManager {
 
     func playStartupSound(enabled: Bool) {
         guard enabled else { return }
-        play("startup")
+        play("startup", fallbackID: 1113)
     }
 
     func playScanningSound(enabled: Bool) {
         guard enabled else { return }
-        play("scanning")
+        play("scanning", fallbackID: 1104)
     }
 
     func playConnectSound(enabled: Bool) {
         guard enabled else { return }
-        play("connected")
+        play("connected", fallbackID: 1117)
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 
-    private func play(_ name: String) {
+    private func play(_ name: String, fallbackID: SystemSoundID) {
         player?.stop()
         player = nil
 
         guard let url = Bundle.main.url(forResource: name, withExtension: "mp3") else {
-            print("Missing sound file: \(name).mp3")
+            print("Missing \(name).mp3, using fallback \(fallbackID)")
+            AudioServicesPlaySystemSound(fallbackID)
             return
         }
 
@@ -44,7 +45,8 @@ final class SoundManager {
             newPlayer.play()
             player = newPlayer
         } catch {
-            print("Sound playback failed: \(error)")
+            print("Sound playback failed for \(name): \(error)")
+            AudioServicesPlaySystemSound(fallbackID)
         }
     }
 }

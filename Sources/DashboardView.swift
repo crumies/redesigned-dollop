@@ -325,31 +325,34 @@ struct RPMArc: View {
     let rpm: Int
     let mode: RideMode
 
+    // Arc begins lower-left and ends lower-right. Redline appears only near the RIGHT end.
     private let startTrim = 0.12
     private let totalTrim = 0.76
 
-    var rpmMaxForMode: Double {
+    var modeLimitRPM: Double {
         switch mode {
-        case .eco: return 4700       // 4000 + overhead
-        case .xc: return 6900        // 6000 + overhead
-        case .sports: return 9200    // 8000 + overhead
-        case .reverse: return 3000
-        case .park: return 1200
+        case .eco: return 4000
+        case .xc: return 6000
+        case .sports: return 8000
+        case .reverse: return 2200
+        case .park: return 1000
         }
     }
 
-    var redlineStart: Double {
-        switch mode {
-        case .eco: return 0.84
-        case .xc: return 0.86
-        case .sports: return 0.88
-        case .reverse: return 0.82
-        case .park: return 0.94
-        }
+    var displayMaxRPM: Double {
+        modeLimitRPM + 500
+    }
+
+    var redlineStartRPM: Double {
+        max(0, modeLimitRPM - 400)
     }
 
     var progress: Double {
-        min(max(Double(rpm) / rpmMaxForMode, 0), 0.97)
+        min(max(Double(rpm) / displayMaxRPM, 0), 0.985)
+    }
+
+    var redlineProgress: Double {
+        min(max(redlineStartRPM / displayMaxRPM, 0), 1)
     }
 
     var baseColor: Color {
@@ -366,36 +369,32 @@ struct RPMArc: View {
         ZStack {
             Circle()
                 .trim(from: startTrim, to: startTrim + totalTrim)
-                .stroke(.white.opacity(0.10), style: StrokeStyle(lineWidth: 15, lineCap: .round))
+                .stroke(.white.opacity(0.10), style: StrokeStyle(lineWidth: 16, lineCap: .round))
                 .rotationEffect(.degrees(90))
 
-            if progress <= redlineStart {
+            if progress <= redlineProgress {
                 Circle()
                     .trim(from: startTrim, to: startTrim + progress * totalTrim)
-                    .stroke(baseColor, style: StrokeStyle(lineWidth: 15, lineCap: .round))
+                    .stroke(baseColor, style: StrokeStyle(lineWidth: 16, lineCap: .round))
                     .rotationEffect(.degrees(90))
                     .shadow(color: baseColor.opacity(0.35), radius: 10)
             } else {
+                // Base part stays mode color.
                 Circle()
-                    .trim(from: startTrim, to: startTrim + progress * totalTrim)
+                    .trim(from: startTrim, to: startTrim + redlineProgress * totalTrim)
+                    .stroke(baseColor, style: StrokeStyle(lineWidth: 16, lineCap: .round))
+                    .rotationEffect(.degrees(90))
+                    .shadow(color: baseColor.opacity(0.35), radius: 10)
+
+                // Redline part is on the RIGHT end only and blends from mode color -> orange -> red.
+                Circle()
+                    .trim(from: startTrim + redlineProgress * totalTrim, to: startTrim + progress * totalTrim)
                     .stroke(
-                        AngularGradient(
-                            colors: [
-                                baseColor,
-                                baseColor,
-                                baseColor,
-                                baseColor.opacity(0.95),
-                                .orange,
-                                .red
-                            ],
-                            center: .center,
-                            startAngle: .degrees(120),
-                            endAngle: .degrees(420)
-                        ),
-                        style: StrokeStyle(lineWidth: 15, lineCap: .round)
+                        LinearGradient(colors: [baseColor, .orange, .red], startPoint: .leading, endPoint: .trailing),
+                        style: StrokeStyle(lineWidth: 16, lineCap: .round)
                     )
                     .rotationEffect(.degrees(90))
-                    .shadow(color: .red.opacity(0.28), radius: 10)
+                    .shadow(color: .red.opacity(0.32), radius: 10)
             }
         }
     }

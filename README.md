@@ -34,3 +34,15 @@ Build Fix 4.7:
 - Wrapped SoundManager and LiveActivityManager calls in Task { @MainActor in ... }.
 - Kept SoundManager/LiveActivityManager @MainActor.
 - Fixed Swift 6 timer closure mutations.
+
+
+v5.3 fixes:
+- Redline gradient moved to the RIGHT side only.
+- Redline starts 400 rpm before the mode limit.
+- RPM bar display max is mode limit + 500 rpm, so there is wiggle room.
+- Eco limit 4000, XC 6000, Sports 8000.
+- Demo power cap raised to 10.5 kW so it can show above 8 kW.
+- Bundled startup/scanning/connected MP3s and added different fallback sound IDs.
+- Ensured Resources are bundled into IPA.
+- Added Bluetooth permission strings.
+- Re-asserted AppIcon settings.
