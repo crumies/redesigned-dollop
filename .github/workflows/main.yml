@@ -45,6 +45,10 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             -derivedDataPath build
 
+      - name: Verify bundled sounds
+        run: |
+          find build -name "*.mp3" -print || true
+
       - name: Create IPA
         run: |
           rm -rf Payload
